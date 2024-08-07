@@ -1,6 +1,7 @@
 package org.project.ImageHosting.admin.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.project.ImageHosting.admin.common.convention.result.Result;
 import org.project.ImageHosting.admin.dto.resp.UserRespDTO;
 import org.project.ImageHosting.admin.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,13 @@ public class UserController {
      * 根据用户名查询用户
      */
     @GetMapping("/api/imghost/v1/user/{username}")
-    public UserRespDTO getUserByUserName(@PathVariable("username") String username) {
-        return userService.getUserByUserName(username);
+    public Result<UserRespDTO> getUserByUserName(@PathVariable("username") String username) {
+        // 返回实体异常处理
+        UserRespDTO result = userService.getUserByUserName(username);
+        if (result == null) {
+            return new Result<UserRespDTO>().setCode("-1").setMessage("用户不存在");
+        } else {
+            return new Result<UserRespDTO>().setCode("0").setData(result);
+        }
     }
 }
