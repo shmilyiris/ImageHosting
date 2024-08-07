@@ -2,6 +2,8 @@ package org.project.ImageHosting.admin.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.project.ImageHosting.admin.common.convention.result.Result;
+import org.project.ImageHosting.admin.common.convention.result.Results;
+import org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum;
 import org.project.ImageHosting.admin.dto.resp.UserRespDTO;
 import org.project.ImageHosting.admin.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +26,13 @@ public class UserController {
     public Result<UserRespDTO> getUserByUserName(@PathVariable("username") String username) {
         // 返回实体异常处理
         UserRespDTO result = userService.getUserByUserName(username);
-        if (result == null) {
-            return new Result<UserRespDTO>().setCode("-1").setMessage("用户不存在");
-        } else {
-            return new Result<UserRespDTO>().setCode("0").setData(result);
-        }
+//        if (result == null) {
+//            return Results.failure(userService.getUserByUserName(username));
+//            return new Result<UserRespDTO>()
+//                    .setCode(UserErrorCodeEnum.USER_NULL.code())
+//                    .setMessage(UserErrorCodeEnum.USER_NULL.message());
+//        } else {
+            return Results.success(userService.getUserByUserName(username));
+//        }
     }
 }

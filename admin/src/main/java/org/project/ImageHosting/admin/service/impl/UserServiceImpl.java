@@ -3,6 +3,9 @@ package org.project.ImageHosting.admin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.project.ImageHosting.admin.common.convention.exception.ClientException;
+import org.project.ImageHosting.admin.common.convention.exception.ServiceException;
+import org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum;
 import org.project.ImageHosting.admin.dao.entity.UserDO;
 import org.project.ImageHosting.admin.dao.mapper.UserMapper;
 import org.project.ImageHosting.admin.dto.resp.UserRespDTO;
@@ -21,11 +24,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
                 .eq(UserDO::getUsername, username);
         UserDO userDO = baseMapper.selectOne(queryWrapper);
+        if (userDO == null) {
+            throw new ServiceException(UserErrorCodeEnum.USER_NULL);
+        }
         UserRespDTO res = new UserRespDTO();
-
-        if (userDO != null) {
-            BeanUtils.copyProperties(userDO, res); // 需要判空才可以使用该方法
-            return res;
-        } else return null;
+        BeanUtils.copyProperties(userDO, res);
+        return res;
     }
 }
