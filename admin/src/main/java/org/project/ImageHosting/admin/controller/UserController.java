@@ -3,12 +3,10 @@ package org.project.ImageHosting.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.project.ImageHosting.admin.common.convention.result.Result;
 import org.project.ImageHosting.admin.common.convention.result.Results;
-import org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum;
+import org.project.ImageHosting.admin.dto.req.UserRegisterReqDTO;
 import org.project.ImageHosting.admin.dto.resp.UserRespDTO;
 import org.project.ImageHosting.admin.service.UserService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户管理控制层
@@ -23,16 +21,22 @@ public class UserController {
      * 根据用户名查询用户
      */
     @GetMapping("/api/imghost/v1/user/{username}")
-    public Result<UserRespDTO> getUserByUserName(@PathVariable("username") String username) {
+    public Result<UserRespDTO> getUserByUsername(@PathVariable("username") String username) {
         // 返回实体异常处理
-        UserRespDTO result = userService.getUserByUserName(username);
-//        if (result == null) {
-//            return Results.failure(userService.getUserByUserName(username));
-//            return new Result<UserRespDTO>()
-//                    .setCode(UserErrorCodeEnum.USER_NULL.code())
-//                    .setMessage(UserErrorCodeEnum.USER_NULL.message());
-//        } else {
-            return Results.success(userService.getUserByUserName(username));
-//        }
+        return Results.success(userService.getUserByUsername(username));
+    }
+
+    /**
+     * 根据用户名判断是否存在
+     */
+    @GetMapping("/api/imghost/v1/user/has-username")
+    public Result<Boolean> hasUsername(@RequestParam("username") String username) {
+        return Results.success(userService.hasUsername(username));
+    }
+
+    @PostMapping("/api/imghost/v1/user")
+    public Result<Void> register(@RequestBody UserRegisterReqDTO reqParam) {
+        userService.register(reqParam);
+        return Results.success();
     }
 }
