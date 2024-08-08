@@ -1,6 +1,8 @@
 package org.project.ImageHosting.admin.dto.resp;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
+import org.project.ImageHosting.admin.common.serialize.PhoneDesensitizationSerializer;
 
 import java.util.Date;
 
@@ -27,6 +29,7 @@ public class UserRespDTO {
     /**
      * 手机号
      */
+    @JsonSerialize(using = PhoneDesensitizationSerializer.class)
     private String phone;
 
     /**
