@@ -3,8 +3,10 @@ package org.project.ImageHosting.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.project.ImageHosting.admin.common.convention.result.Result;
 import org.project.ImageHosting.admin.common.convention.result.Results;
+import org.project.ImageHosting.admin.dto.req.UserLoginReqDTO;
 import org.project.ImageHosting.admin.dto.req.UserRegisterReqDTO;
 import org.project.ImageHosting.admin.dto.req.UserUpdateReqDTO;
+import org.project.ImageHosting.admin.dto.resp.UserLoginRespDTO;
 import org.project.ImageHosting.admin.dto.resp.UserRespDTO;
 import org.project.ImageHosting.admin.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +53,21 @@ public class UserController {
     public Result<Void> update(@RequestBody UserUpdateReqDTO reqParam) {
         userService.update(reqParam);
         return Results.success();
+    }
+
+    @GetMapping("/api/imghost/v1/user/check-login")
+    public Result<Boolean> checkLogin(@RequestParam("username") String username, @RequestParam("token") String token) {
+        return Results.success(userService.checkLogin(username, token));
+    }
+
+    @PostMapping("/api/imghost/v1/user/login")
+    public Result<UserLoginRespDTO> login(@RequestBody UserLoginReqDTO reqParam) {
+        return Results.success(userService.login(reqParam));
+    }
+
+    @DeleteMapping("/api/imghost/v1/user/logout")
+    public Result<Boolean> logout(@RequestParam("username") String username, @RequestParam("token") String token) {
+        return Results.success(userService.logout(username, token));
     }
 
 }
