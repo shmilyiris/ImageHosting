@@ -2,6 +2,7 @@ package org.project.ImageHosting.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -11,16 +12,17 @@ import org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum;
 import org.project.ImageHosting.admin.dao.entity.UserDO;
 import org.project.ImageHosting.admin.dao.mapper.UserMapper;
 import org.project.ImageHosting.admin.dto.req.UserRegisterReqDTO;
+import org.project.ImageHosting.admin.dto.req.UserUpdateReqDTO;
 import org.project.ImageHosting.admin.dto.resp.UserRespDTO;
 import org.project.ImageHosting.admin.service.UserService;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import static org.project.ImageHosting.admin.common.constant.RedisCacheConstant.LOCK_USER_REGISTER_KEY;
-import static org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum.USER_NAME_EXIST;
-import static org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum.USER_SAVE_ERROR;
+import static org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum.*;
 
 
 /**
@@ -60,22 +62,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ClientException(USER_NAME_EXIST);
 
         RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + reqParam.getUsername());
-        try {
-            // 业务逻辑
-            if (lock.tryLock()) {
-                int inserted = baseMapper.insert(BeanUtil.toBean(reqParam, UserDO.class));
-                if (inserted < 1) {
-                    throw new ClientException(USER_SAVE_ERROR);
-                }
-                userRegisterCachePenetrationBloomFilter.add(reqParam.getUsername());
-                return;
-            }
+        if (!lock.tryLock())
             throw new ClientException(USER_NAME_EXIST);
+        try {
+            // 业务逻辑: 新增用户
+            int inserted = baseMapper.insert(BeanUtil.toBean(reqParam, UserDO.class)    );
+            if (inserted < 1)
+                throw new ClientException(USER_SAVE_ERROR);
+            userRegisterCachePenetrationBloomFilter.add(reqParam.getUsername());
+        } catch (DuplicateKeyException ex) {
+            throw new ClientException(USER_EXIST);
         } finally {
             // 释放锁
             lock.unlock();
         }
+    }
 
+    @Override
+    public void update(UserUpdateReqDTO reqParam) {
+        if (!hasUsername(reqParam.getUsername()))
+            throw new ClientException(USER_NULL);
+        LambdaUpdateWrapper<UserDO> updateWrapper = Wrappers.lambdaUpdate(UserDO.class)
+                .eq(UserDO::getUsername, reqParam.getUsername());
+        baseMapper.update(BeanUtil.toBean(reqParam, UserDO.class), updateWrapper);
     }
 
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.project.ImageHosting.admin.common.convention.result.Result;
 import org.project.ImageHosting.admin.common.convention.result.Results;
 import org.project.ImageHosting.admin.dto.req.UserRegisterReqDTO;
+import org.project.ImageHosting.admin.dto.req.UserUpdateReqDTO;
 import org.project.ImageHosting.admin.dto.resp.UserRespDTO;
 import org.project.ImageHosting.admin.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +35,22 @@ public class UserController {
         return Results.success(userService.hasUsername(username));
     }
 
+    /**
+     * 用户注册
+     */
     @PostMapping("/api/imghost/v1/user")
     public Result<Void> register(@RequestBody UserRegisterReqDTO reqParam) {
         userService.register(reqParam);
         return Results.success();
     }
+
+    /**
+     * 用户信息更新
+     */
+    @PutMapping("/api/imghost/v1/user")
+    public Result<Void> update(@RequestBody UserUpdateReqDTO reqParam) {
+        userService.update(reqParam);
+        return Results.success();
+    }
+
 }
