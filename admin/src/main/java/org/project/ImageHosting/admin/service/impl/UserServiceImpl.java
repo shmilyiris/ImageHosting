@@ -14,9 +14,11 @@ import org.project.ImageHosting.admin.dto.req.UserRegisterReqDTO;
 import org.project.ImageHosting.admin.dto.resp.UserRespDTO;
 import org.project.ImageHosting.admin.service.UserService;
 import org.redisson.api.RBloomFilter;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-
+import static org.project.ImageHosting.admin.common.constant.RedisCacheConstant.LOCK_USER_REGISTER_KEY;
 import static org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum.USER_NAME_EXIST;
 import static org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum.USER_SAVE_ERROR;
 
@@ -29,6 +31,7 @@ import static org.project.ImageHosting.admin.common.enums.UserErrorCodeEnum.USER
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
+    private final RedissonClient redissonClient;
 
     @Override
     public UserRespDTO getUserByUsername(String username) {
@@ -55,10 +58,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     public void register(UserRegisterReqDTO reqParam) {
         if (hasUsername(reqParam.getUsername()))
             throw new ClientException(USER_NAME_EXIST);
-        int inserted = baseMapper.insert(BeanUtil.toBean(reqParam, UserDO.class));
-        if (inserted < 1)
-            throw new ClientException(USER_SAVE_ERROR);
-        userRegisterCachePenetrationBloomFilter.add(reqParam.getUsername());
+
+        RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + reqParam.getUsername());
+        try {
+            // 业务逻辑
+            if (lock.tryLock()) {
+                int inserted = baseMapper.insert(BeanUtil.toBean(reqParam, UserDO.class));
+                if (inserted < 1) {
+                    throw new ClientException(USER_SAVE_ERROR);
+                }
+                userRegisterCachePenetrationBloomFilter.add(reqParam.getUsername());
+                return;
+            }
+            throw new ClientException(USER_NAME_EXIST);
+        } finally {
+            // 释放锁
+            lock.unlock();
+        }
+
     }
 
 }
