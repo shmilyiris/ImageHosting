@@ -18,6 +18,8 @@ import org.project.ImageHosting.admin.dto.req.UserUpdateReqDTO;
 import org.project.ImageHosting.admin.dto.resp.UserLoginRespDTO;
 import org.project.ImageHosting.admin.dto.resp.UserRespDTO;
 import org.project.ImageHosting.admin.service.UserService;
+import org.project.ImageHosting.admin.toolkit.Generator;
+import org.project.ImageHosting.admin.toolkit.JwtUtil;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -114,7 +116,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ClientException(USER_LOGIN);
 
         // 生成token
-        String uuid = UUID.randomUUID().toString();
+//        String token = UUID.randomUUID().toString();
+        String token = JwtUtil.generateToken(reqParam.getUsername());
         /*
         Hash:
             key: login_username
@@ -124,12 +127,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
          */
         stringRedisTemplate.opsForHash().put(
                 "login_"+reqParam.getUsername(),
-                uuid,
+                token,
                 JSON.toJSONString(userDO)
         );
         // 设置token过期时间
         stringRedisTemplate.expire("login_"+reqParam.getUsername(), 30L, TimeUnit.MINUTES);
-        return new UserLoginRespDTO(uuid);
+        return new UserLoginRespDTO(token);
     }
 
     public Boolean logout(String username, String token) {
