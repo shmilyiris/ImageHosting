@@ -61,10 +61,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public Boolean hasUsername(String username) {
-        LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
-                .eq(UserDO::getUsername, username);
-        return baseMapper.selectOne(queryWrapper) != null;
-//        return userRegisterCachePenetrationBloomFilter.contains(username); // 布隆过滤器判断是否存在
+        return userRegisterCachePenetrationBloomFilter.contains(username); // 布隆过滤器判断是否存在
     }
 
     @Override
