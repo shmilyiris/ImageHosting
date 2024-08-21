@@ -18,24 +18,24 @@ public interface GroupService extends IService<GroupDO> {
      * 新增图床分组
      */
     void saveGroup(String username, String groupName);
-//
+
 //    /**
 //     * 查询图床分组集合
 //     */
 //    List<ImageGroupRespDTO> listGroup();
-//
-//    /**
-//     * 修改图床分组
-//     */
-//    void updateGroup(ImageGroupUpdateReqDTO reqParam);
-//
-//    /**
-//     * 删除图床分组
-//     */
-//    void deleteGroup(String gid);
-//
-//    /**
-//     * 图床分组排序
-//     */
-//    void sortGroup(List<ImageGroupSortReqDTO> reqParam);
+
+    /**
+     * 修改图床分组
+     */
+    void updateGroup(ImageGroupUpdateReqDTO reqParam);
+
+    /**
+     * 删除图床分组
+     */
+    void deleteGroup(String gid);
+
+    /**
+     * 图床分组排序
+     */
+    void sortGroup(List<ImageGroupSortReqDTO> reqParam);
 }

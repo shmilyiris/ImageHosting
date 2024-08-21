@@ -2,14 +2,20 @@ package org.project.ImageHosting.admin.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.el.ExpressionFactory;
 import lombok.RequiredArgsConstructor;
 import org.project.ImageHosting.admin.common.biz.user.UserContext;
 import org.project.ImageHosting.admin.common.convention.exception.ClientException;
+import org.project.ImageHosting.admin.common.convention.result.Result;
 import org.project.ImageHosting.admin.dao.entity.GroupDO;
 import org.project.ImageHosting.admin.dao.mapper.GroupMapper;
+import org.project.ImageHosting.admin.dto.req.ImageGroupSortReqDTO;
+import org.project.ImageHosting.admin.dto.req.ImageGroupUpdateReqDTO;
+import org.project.ImageHosting.admin.dto.resp.ImageGroupRespDTO;
+import org.project.ImageHosting.admin.remote.dto.resp.ImageGroupCountQueryRespDTO;
 import org.project.ImageHosting.admin.service.GroupService;
 import org.project.ImageHosting.admin.toolkit.Generator;
 import org.redisson.api.RLock;
@@ -64,6 +70,42 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public void updateGroup(ImageGroupUpdateReqDTO reqParam) {
+        LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .eq(GroupDO::getGid, reqParam.getGid())
+                .eq(GroupDO::getDelFlag, 0);
+        GroupDO groupDO = new GroupDO();
+        groupDO.setName(reqParam.getName());
+        baseMapper.update(groupDO, updateWrapper);
+    }
+
+    @Override
+    public void deleteGroup(String gid) {
+        LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .eq(GroupDO::getGid, gid)
+                .eq(GroupDO::getDelFlag, 0);
+        GroupDO groupDO = new GroupDO();
+        groupDO.setDelFlag(1);
+        baseMapper.update(groupDO, updateWrapper);
+    }
+
+    @Override
+    public void sortGroup(List<ImageGroupSortReqDTO> reqParam) {
+        reqParam.forEach(each -> {
+            GroupDO groupDO = GroupDO.builder()
+                    .sortOrder(each.getSortOrder())
+                    .build();
+            LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
+                    .eq(GroupDO::getUsername, UserContext.getUsername())
+                    .eq(GroupDO::getGid, each.getGid())
+                    .eq(GroupDO::getDelFlag, 0);
+            baseMapper.update(groupDO, updateWrapper);
+        });
     }
 
     private boolean hasGid(String username, String gid) {
