@@ -21,6 +21,7 @@ import org.project.ImageHosting.admin.service.GroupService;
 import org.project.ImageHosting.admin.toolkit.Generator;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +34,8 @@ import static org.project.ImageHosting.admin.common.constant.RedisCacheConstant.
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
 
     private final RedissonClient redissonClient;
+
+    @Value("${image.group.max-num}")
     private int groupMaxNum;
 
     @Override

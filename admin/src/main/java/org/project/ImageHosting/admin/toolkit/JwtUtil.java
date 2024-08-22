@@ -12,7 +12,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private static String secretKey = "ImageHosting_secret_key"; // 密钥
+    private static final String secretKey = "ImageHosting_secret_key"; // 密钥
     private final static long expirationTime = 1000 * 60 * 60 * 2; // 过期时间 2h
 
     // 从token中获取用户名
@@ -29,7 +29,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(username)
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(SignatureAlgorithm.HS512, secretKey)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
