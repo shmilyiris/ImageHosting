@@ -19,10 +19,10 @@ public interface GroupService extends IService<GroupDO> {
      */
     void saveGroup(String username, String groupName);
 
-//    /**
-//     * 查询图床分组集合
-//     */
-//    List<ImageGroupRespDTO> listGroup();
+    /**
+     * 查询图床分组集合
+     */
+    List<ImageGroupRespDTO> listGroup();
 
     /**
      * 修改图床分组

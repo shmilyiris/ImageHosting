@@ -6,6 +6,7 @@ import org.project.ImageHosting.admin.common.convention.result.Results;
 import org.project.ImageHosting.admin.dto.req.ImageGroupSaveReqDTO;
 import org.project.ImageHosting.admin.dto.req.ImageGroupSortReqDTO;
 import org.project.ImageHosting.admin.dto.req.ImageGroupUpdateReqDTO;
+import org.project.ImageHosting.admin.dto.resp.ImageGroupRespDTO;
 import org.project.ImageHosting.admin.service.GroupService;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,11 @@ public class GroupController {
         return Results.success();
     }
 
+    @GetMapping("/api/imghost/admin/v1/group")
+    public Result<List<ImageGroupRespDTO>> listGroup() {
+        return Results.success(groupService.listGroup());
+    }
+
     @PutMapping("/api/imghost/admin/v1/group")
     public Result<Void> updateGroup(@RequestBody ImageGroupUpdateReqDTO reqParam) {
         groupService.updateGroup(reqParam);
@@ -34,7 +40,7 @@ public class GroupController {
         return Results.success();
     }
 
-    @PostMapping("/api/imghost/admin/v1/group")
+    @PostMapping("/api/imghost/admin/v1/group/sort")
     public Result<Void> sortGroup(@RequestBody List<ImageGroupSortReqDTO> reqParam) {
         groupService.sortGroup(reqParam);
         return Results.success();
